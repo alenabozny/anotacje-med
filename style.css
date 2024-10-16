@@ -1,0 +1,36 @@
+div.element-container:not(:first-child) {
+    margin-bottom: 2rem;
+}
+
+label.css-ue6h4q.e1y5xkzn3 {
+    margin-bottom: 1rem;
+}
+
+label.css-ue6h4q.e1y5xkzn3 p {
+    font-weight: bold;
+}
+
+label.css-ue6h4q.e1y5xkzn3 div p {
+    font-size: large;
+}
+
+div.css-5rimss.e1nzilvr5 blockquote p {
+    font-size: larger;
+}
+
+div.css-5rimss.e1nzilvr5 blockquote {
+    font-size: larger;
+    background-color: #F5F5F5;
+}
+
+div.css-5rimss.e1nzilvr5 {
+    margin-left: -10%;
+}
+
+*, ::before, ::after {
+    box-sizing: inherit !important;
+}
+
+div.stDeployButton {
+    display: none !important;
+}

@@ -1,0 +1,18 @@
+credentials:
+  usernames:
+    anotator_test:
+      email: ''
+      name: 'Anotator TEST'
+      password: $2b$12$T3PA3A40ORNLPcBZxdsxLOtOGVZ7jaEc60tHnidBGZbecwlj/qvwK
+    anotator_0:
+      email: 'abc'
+      name: 'ANOTATOR #0'
+      password: $2b$12$fqkM7dZ5iC17ibAJELs1Jei4lq6gH5AtoNJe0D4MsVEeKNH2gymim
+
+
+cookie:
+  expiry_days: 1
+  key: of1xZ6fmq3TKKtohbRuv3uqxkxI6mk26JmXd8YbHaaMf5HDuJr3qnz4wpjadARlhzk5uFrj6KBr5HGI0LDlzNZEHc4gfc551I19MgeahHCHc2u0digHxi87SMEB0Nj33EXisboldW2EVB4qRYDVfThgK9GUtSQ7KXmGEiO_Geh8LXhElNom1X0HMaoB2Mub0ioJh0YJ3GngCKnrn34GLkGpONoihLXVADo1dxftdpocfSbq39CSTE6JAsPI30XNBlodAJ6dfgGiO5rH5qOl7CaaGcvCEt8vQQeeBMho3a4tyRf4Gd5VOjI7gsZPiTUcLMQrYdUadY02sUv9LsCSxqQ # Must be string
+  name: qFxDvDZ_2q3Li_uyc1btaAs7o4OVGDXa2_jRtBKXEPDvOvjVccjFBfQ_Q1YEpsr3itxnniGALewDMGjs0R9zXmDOplWVplaBdjo0NLWDVWU2cmfsiFI7MVjQBzP2qiYG_Mb5ebh2oSkpUC5
+preauthorized:
+  emails:
