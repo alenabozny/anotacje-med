@@ -134,7 +134,7 @@ bucket_name = 'your-bucket-name'
 def log_survey_state_and_activity(survey, s_pages, selected_pack, ct_id, username):
     try:
         # Define S3 keys for the logs
-        last_state_key = f"data/replies/{username}/logs/{selected_pack}_last_state.json"
+        last_state_key = f"data/replies/{username}/logs/{selected_pack}_last_state.txt"
         general_log_key = f"data/replies/{username}/logs/general.txt"
 
         if s_pages.current > 0:
@@ -170,3 +170,55 @@ def log_survey_state_and_activity(survey, s_pages, selected_pack, ct_id, usernam
 
     except Exception as e:
         print(f"Error logging survey state and activity to S3: {e}")
+
+import re
+import json
+
+import json
+
+def extract_entry_data(entry):
+    # Split the entry by '---' to separate the header and the JSON content
+    [header, json_part] = entry.split(' ---\n')
+    
+    # Extract the timestamp and page from the header
+    timestamp, page_info = header.split(' | ')
+    timestamp = float(timestamp.strip())
+    
+    # Extract the widget key IDs from the JSON
+    data_dict = json.loads(json_part.strip())
+    
+    # Create a new dictionary to store the result
+    result_dict = {}
+    ct_id = ''
+    for key, value in data_dict.items():
+        # Extract the widget ID from the key (e.g., "5444_wiarygdnosc" -> "5444")
+        widget_id = value['widget_key'].split('_')[1]  # get the part before the underscore
+        result_dict[widget_id] = value['value']  # Store value and timestamp
+        ct_id = value['widget_key'].split('_')[0]
+    
+    return {
+        "timestamp": timestamp,
+        "ct_id": ct_id,  # Extract the page number
+        "widgets": result_dict
+    }
+
+def get_last_state_per_page(survey_log_key):
+    # Split the log into individual states based on "--- time"
+    last_state_object = s3.get_object(Bucket=BUCKET_NAME, Key=survey_log_key)
+    last_state_content = last_state_object['Body'].read().decode('utf-8')
+    survey_states = re.split(r'--- time ', last_state_content)
+    
+    # Dictionary to store the last state per page
+    page_state_dict = {}
+    
+    # Iterate through each state entry and extract the page and JSON data
+    for entry in survey_states[1:]:  # Skip the first empty entry
+        entry_dict = extract_entry_data(entry)
+        page_state_dict[entry_dict['ct_id']] = (entry_dict['timestamp'], 
+                                               entry_dict['widgets'])
+
+
+    print("Page states:")
+    return page_state_dict
+
+# get_last_state_per_page('data/replies/anotator_0/logs/0_last_state.txt')

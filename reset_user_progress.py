@@ -59,7 +59,7 @@ for user in users:
     for file in inside:
         try:
             # Deleting the file or folder
-            delete_s3_folder(f"{user_prefix}{file}")
+            delete_s3_folder(f"{user_prefix}/{file}")
         except Exception as e:
             print(f"Error deleting {file} in {user_prefix}: {e}")
 
