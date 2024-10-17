@@ -60,9 +60,9 @@ try:
                                                                                                    ct_id))
         with s_pages:
             st.title("Anotacje")
-            st.write(f"Jesteś zalogowany jako *{st.session_state['name']}* \t|\t Anotujesz tweet {s_pages.current} na {len(contents)} w paczce nr {selected_pack}")
+            st.write(f"Jesteś zalogowany jako *{st.session_state['name']}* \t|\t Anotujesz treść {s_pages.current} na {len(contents)} w paczce nr {selected_pack}")
             if s_pages.current == 0:
-                st.markdown(f"Tutaj jest miejsce na opis rundy do anotacji.")
+                st.markdown(f"Zaraz zaczniesz rundę anotacji fragmentów treści pochodzących z POPULARNONAUKOWYCH portali medycznych (medonet, hellozdrowie, itp.). Oceń ich wiarygodność na podstawie EMB, własnej intuicji oraz doświadczenia klinicznego.")
             else:
                 current_content = contents[s_pages.current - 1]
                 ct_id = current_content[0]
@@ -79,12 +79,20 @@ try:
                     captions=[
                         "Wszystko się zgadza",
                         "Fragment nie dotyczy medycyny",
-                        "Fałszywe informacje, wyolbrzymienie, zła interpretacja danych, etc.",
+                        "Fałszywe informacje, wyolbrzymienie, zła interpretacja prawdziwych danych, etc.",
                     ],
                     key=f"{ct_id}_wiarygdnosc"
                 )
                 if cred == "Niewiarygodny":
-                    survey.multiselect("Dlaczego tekst jest według Ciebie niewiarygodny:", options=["a","b","c"], key=f"{ct_id}_czemu_niewiarygodne")
+                    survey.multiselect("Dlaczego tekst jest według Ciebie niewiarygodny:", 
+                                       options=['Zawiera fałszywe informacje',
+                                                'Zawiera przedawnione/nieaktualne informacje',
+                                                'Zawiera częściowo fałszywe informacje',
+                                                'Zawiera fałszywe informacje, które są rozmyte poprzez złagodzony ton wypowiedzi',
+                                                'Zawiera informacje niemozliwe do zweryfikowania',
+                                                'Zawiera prawdziwe informacje, jednak nieproporcjonalnie wyolbrzymione',
+                                                'Zawiera prawdziwe informacje, ale sens zdania jest wypaczony przez jedno słowo'], 
+                                       key=f"{ct_id}_czemu_niewiarygodne")
                 
                 survey.checkbox("Dane we fragmencie są niemozliwe do weryfikacji.", key=f"{ct_id}_niemozliwe")
         
