@@ -56,7 +56,7 @@ if st.session_state["authentication_status"]:
 
     username = st.session_state['username']
     user_packs = list_user_packs(username)
-    user_progress = get_user_progress_from_s3(file_key=f"data/replies/{st.session_state['username']}/packs_done.txt")
+    user_progress = get_user_progress_from_s3(username)
 
     _pack_done = ":white_check_mark: Paczka skończona"
     _pack_undone = ":white_square_button: Czeka na wykonanie"
@@ -64,7 +64,7 @@ if st.session_state["authentication_status"]:
     pack_rows = []
 
     for pack in user_packs:
-        pack_rows.append(f"| Paczka #{pack.split('_')[-3]} | {_pack_done if pack in user_progress else _pack_undone} |")
+        pack_rows.append(f"| Paczka #{pack.split('_')[-3]} | {_pack_done if pack.split('_')[-3] in user_progress else _pack_undone} |")
 
     st.markdown("| Numer paczki | Wykonana czy nie |\n| --- | --- |\n" + "\n".join(pack_rows))
 
