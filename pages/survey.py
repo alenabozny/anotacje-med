@@ -72,7 +72,6 @@ try:
 
         import inspect
         s_pages = survey.pages(len(contents) + 1, progress_bar=True, on_submit=lambda: survey_done("Paczka ukończona. Wyniki zapisane. Dziękujemy!"))
-        print(inspect.getfullargspec(survey.pages))
 
         with s_pages:
             st.title("Anotacje")
@@ -112,9 +111,7 @@ try:
                 survey.checkbox("Dane we fragmencie są niemozliwe do weryfikacji.", key=f"{ct_id}_niemozliwe")
         
     else:
-        print("wywaliło mnie z sesji...")
         switch_page("main")
 except Exception as e:
-    print("wywaliło z powodu erroru")
     print(e)
     switch_page("main")

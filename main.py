@@ -4,6 +4,9 @@ import yaml
 from yaml.loader import SafeLoader
 import os
 from streamlit_extras.switch_page_button import switch_page
+import boto3
+from botocore.exceptions import NoCredentialsError
+from utils import list_user_packs, get_user_progress_from_s3
 
 # Hide the sidebar
 
@@ -51,9 +54,9 @@ if st.session_state["authentication_status"]:
 
     st.header('Dostępne paczki')
 
-    user_packs = sorted([x for x in os.listdir("data/sourcepacks_med/jsons_all") if x.endswith(f"person_{st.session_state['username'].split('_')[-1]}.json")])
-    with open(f"data/replies/{st.session_state['username']}/packs_done.txt", "r") as fin:
-        user_progress = [x.strip() for x in fin.readlines()]
+    username = st.session_state['username']
+    user_packs = list_user_packs(username)
+    user_progress = get_user_progress_from_s3(file_key=f"data/replies/{st.session_state['username']}/packs_done.txt")
 
     _pack_done = ":white_check_mark: Paczka skończona"
     _pack_undone = ":white_square_button: Czeka na wykonanie"
@@ -61,7 +64,7 @@ if st.session_state["authentication_status"]:
     pack_rows = []
 
     for pack in user_packs:
-        pack_rows.append(f"| Paczka #{pack.split('_')[1]} | {_pack_done if pack in user_progress else _pack_undone} |")
+        pack_rows.append(f"| Paczka #{pack.split('_')[-3]} | {_pack_done if pack in user_progress else _pack_undone} |")
 
     st.markdown("| Numer paczki | Wykonana czy nie |\n| --- | --- |\n" + "\n".join(pack_rows))
 
