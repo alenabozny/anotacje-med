@@ -163,3 +163,5 @@ cython_debug/
 users_yaml_*
 .DS_Store
 */.DS_Store
+
+data/
