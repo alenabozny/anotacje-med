@@ -10,7 +10,7 @@ from uuid import uuid4
 import os
 from streamlit_extras.switch_page_button import switch_page
 import time
-from utils import list_user_packs, get_user_progress_from_s3, load_json_from_s3, survey_done, log_survey_state_and_activity
+from utils import list_user_packs, get_user_progress_from_s3, load_json_from_s3, survey_done, log_survey_state_and_activity, update_ans_dict 
 
 # Hide the sidebar
 
@@ -43,8 +43,6 @@ try:
         unfinished_packs = [x for x in user_packs if x not in user_progress]
         selected_pack = unfinished_packs[0]
 
-        print(unfinished_packs)
-
         # Load survey-specific CSS
         with open("style.css", "r") as fin:
             st.markdown(f"<style>{fin.read()}</style>", unsafe_allow_html=True)
@@ -56,7 +54,6 @@ try:
         survey = ss.StreamlitSurvey(f"pack_{selected_pack}_person_{username.split('_')[-1]}.json")
         s_pages = survey.pages(len(contents) + 1, progress_bar=True, on_submit=lambda: survey_done("Paczka ukończona. Wyniki zapisane. Dziękujemy!",
                                                                                                    selected_pack,
-                                                                                                   survey,
                                                                                                    ct_id))
         with s_pages:
             st.title("Anotacje")
@@ -64,37 +61,74 @@ try:
             if s_pages.current == 0:
                 st.markdown(f"Zaraz zaczniesz rundę anotacji fragmentów treści pochodzących z POPULARNONAUKOWYCH portali medycznych (medonet, hellozdrowie, itp.). Oceń ich wiarygodność na podstawie EMB, własnej intuicji oraz doświadczenia klinicznego.")
             else:
-                current_content = contents[s_pages.current - 1]
+                current_content = contents[s_pages.current-1]
                 ct_id = current_content[0]
                 ct_body = current_content[1]
 
-                if s_pages.current > 0:
-                    log_survey_state_and_activity(survey, s_pages, selected_pack, ct_id, username)
+                sjson = survey.to_json()
+                survey_dict = json.loads(sjson)
+                ans_tpl = ()
+                ct_id_to_save = 'empty'
 
+                try:
+                    cred_val = survey_dict['Oceń czy fragment tekstu jest Wiarygodny, Niewiarygodny czy Neutralny']["value"]
+                    ct_id_to_save = survey_dict['Oceń czy fragment tekstu jest Wiarygodny, Niewiarygodny czy Neutralny']["widget_key"].split('_')[0]
+                    # print(cred_val)
+                    ans_tpl = ans_tpl + (cred_val,)
+                except Exception as e:
+                    print(e)
+                    print("Pusty dict")
+
+                try:
+                    unable_val = survey_dict['Dane we fragmencie są niemozliwe do weryfikacji.']["value"]
+                    # print(unable_val)
+                    ans_tpl = ans_tpl + (unable_val,)
+                except Exception as e:
+                    # print(e)
+                    print("Brak info o mozliwosci oceny")
+
+                try:
+                    tags_val = survey_dict["Dlaczego tekst jest według Ciebie niewiarygodny:"]["value"]
+                    # print(tags_val)
+                    ans_tpl = ans_tpl + (tags_val,)
+                except Exception as e:
+                    # print(e)
+                    print("Brak pozycji 'dlaczego niewiarygodny'")
+
+                # log_survey_state_and_activity(survey, s_pages, selected_pack, ct_id, username)
+
+                st.markdown(f"### {ct_id}")
                 st.markdown(f"> {ct_body}")
                 
-                cred = survey.radio(
-                    "Oceń czy fragment tekstu jest Wiarygodny, Niewiarygodny czy Neutralny",
-                    options=["Wiarygodny", "Neutralny", "Niewiarygodny"],
-                    captions=[
-                        "Wszystko się zgadza",
-                        "Fragment nie dotyczy medycyny",
-                        "Fałszywe informacje, wyolbrzymienie, zła interpretacja prawdziwych danych, etc.",
-                    ],
-                    key=f"{ct_id}_wiarygdnosc"
-                )
-                if cred == "Niewiarygodny":
-                    survey.multiselect("Dlaczego tekst jest według Ciebie niewiarygodny:", 
-                                       options=['Zawiera fałszywe informacje',
-                                                'Zawiera przedawnione/nieaktualne informacje',
-                                                'Zawiera częściowo fałszywe informacje',
-                                                'Zawiera fałszywe informacje, które są rozmyte poprzez złagodzony ton wypowiedzi',
-                                                'Zawiera informacje niemozliwe do zweryfikowania',
-                                                'Zawiera prawdziwe informacje, jednak nieproporcjonalnie wyolbrzymione',
-                                                'Zawiera prawdziwe informacje, ale sens zdania jest wypaczony przez jedno słowo'], 
-                                       key=f"{ct_id}_czemu_niewiarygodne")
+                unable_to_answer = survey.checkbox("Dane we fragmencie są niemozliwe do weryfikacji.", key=f"{ct_id}_niemozliwe")
+
+                if unable_to_answer == False:
+                    cred = survey.radio(
+                        "Oceń czy fragment tekstu jest Wiarygodny, Niewiarygodny czy Neutralny",
+                        options=["Wiarygodny", "Neutralny", "Niewiarygodny"],
+                        captions=[
+                            "Wszystko się zgadza",
+                            "Fragment nie dotyczy medycyny",
+                            "Fałszywe informacje, wyolbrzymienie, zła interpretacja prawdziwych danych, etc.",
+                        ],
+                        key=f"{ct_id}_wiarygdnosc",
+                        index=None
+                    )
+                    if cred == "Niewiarygodny":
+                        survey.multiselect("Dlaczego tekst jest według Ciebie niewiarygodny:", 
+                                        options=['Zawiera fałszywe informacje',
+                                                    'Zawiera przedawnione/nieaktualne informacje',
+                                                    'Zawiera częściowo fałszywe informacje',
+                                                    'Zawiera fałszywe informacje, które są rozmyte poprzez złagodzony ton wypowiedzi',
+                                                    'Zawiera informacje niemozliwe do zweryfikowania',
+                                                    'Zawiera prawdziwe informacje, jednak nieproporcjonalnie wyolbrzymione',
+                                                    'Zawiera prawdziwe informacje, ale sens zdania jest wypaczony przez jedno słowo'], 
+                                        key=f"{ct_id}_czemu_niewiarygodne",
+                                        default=None)
+                    elif cred is None: # Check if the user has made a selection
+                        st.error("Proszę dokonać wyboru przed kontynuacją.")
                 
-                survey.checkbox("Dane we fragmencie są niemozliwe do weryfikacji.", key=f"{ct_id}_niemozliwe")
+                update_ans_dict(ct_id_to_save, ans_tpl)
         
     else:
         switch_page("main")

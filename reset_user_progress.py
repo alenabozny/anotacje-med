@@ -1,6 +1,7 @@
 import boto3
 from dotenv import load_dotenv
 import os
+from utils import delete_all_answers
 
 load_dotenv()
 
@@ -18,6 +19,8 @@ s3 = boto3.client(
 
 BUCKET_NAME = 'anotacje-med'
 
+delete_all_answers()
+
 # Function to list "folders" (S3 prefixes) under a specific path
 def list_folders_in_s3(prefix):
     result = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=prefix, Delimiter='/')
@@ -29,7 +32,7 @@ def list_folders_in_s3(prefix):
 def list_files_in_s3(prefix):
     result = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=prefix)
     if 'Contents' in result:
-        return [obj['Key'].split('/')[-1] for obj in result['Contents']]
+        return [obj['Key'] for obj in result['Contents']]
     return []
 
 # Function to delete files or folders in S3
@@ -37,6 +40,8 @@ def delete_s3_folder(prefix):
     result = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=prefix)
     if 'Contents' in result:
         objects_to_delete = [{'Key': obj['Key']} for obj in result['Contents']]
+        print("To be deleted:")
+        print(objects_to_delete)
         s3.delete_objects(Bucket=BUCKET_NAME, Delete={'Objects': objects_to_delete})
 
 # Function to create an empty file in S3 (to simulate `touch`)
@@ -52,23 +57,25 @@ users = list_folders_in_s3(users_prefix)
 
 # Iterate through users and handle their folders and files
 for user in users:
-    user_prefix = f"{users_prefix}{user}/"
+    user_prefix = f"{users_prefix}{user}"
     inside = list_files_in_s3(user_prefix)
+    print(inside)
 
     # Delete files or folders under each user's directory
     for file in inside:
         try:
             # Deleting the file or folder
-            delete_s3_folder(f"{user_prefix}/{file}")
+            delete_s3_folder(file)
         except Exception as e:
-            print(f"Error deleting {file} in {user_prefix}: {e}")
+            print(f"Error deleting {file}: {e}")
 
     # Recreate fresh directories or empty files
     for f in fresh_to_touch:
-        full_key = f"{user_prefix}{f}"
+        full_key = f"{user_prefix}/{f}"
         if f.endswith('/'):
             # "Folder" in S3, no action needed since S3 doesn't have real directories
             pass
         else:
             # Create an empty file
+            print(f"newly created: {full_key}")
             create_empty_file_in_s3(full_key)

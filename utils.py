@@ -4,12 +4,25 @@ import os
 from dotenv import load_dotenv
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
+from datetime import datetime
 
 load_dotenv()
 
 aws_access_key = os.getenv('AWS_ACCESS_KEY_ID')
 aws_secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 # aws_region = os.getenv('AWS_DEFAULT_REGION')
+
+import sqlite3
+
+def get_timestamped_db_name(base_name="answers"):
+    # Generate a timestamp string in the format YYYYMMDD_HHMMSS
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{base_name}_{timestamp}.db"
+
+def get_db_connection():
+    conn = sqlite3.connect('answers.db')
+    conn.row_factory = sqlite3.Row  # This returns results as dictionaries
+    return conn
 
 # Initialize S3 client
 s3 = boto3.client(
@@ -20,6 +33,47 @@ s3 = boto3.client(
 )
 
 BUCKET_NAME = 'anotacje-med'
+
+def select_all_answers():
+    conn = get_db_connection()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    # Select all rows from the 'answers' table
+    cursor.execute('SELECT * FROM answers;')
+    
+    # Fetch all rows
+    rows = cursor.fetchall()
+
+    # Print each row
+    for row in rows:
+        print(dict(row))
+    
+    conn.close()
+
+def delete_all_answers():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Select all rows from the 'answers' table
+    cursor.execute('DELETE FROM answers;')
+    conn.close()
+
+def update_ans_dict(ct_id, ans_tpl):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Check if the ct_id already exists in the table
+    cursor.execute('''
+        INSERT INTO answers (ct_id, answer) 
+        VALUES (?, ?) 
+        ON CONFLICT(ct_id) 
+        DO UPDATE SET answer=excluded.answer
+    ''', (ct_id, json.dumps(ans_tpl)))
+    
+    print(f"Answer for Content nr {ct_id} submitted to the database with values {ans_tpl}")
+    conn.commit()
+    conn.close()
 
 def list_user_packs(username, prefix='data/sourcepacks_med/jsons_all/'):
     user_suffix = username.split('_')[-1]  # Extract suffix from username
@@ -73,19 +127,34 @@ def load_json_from_s3(file_key):
     except Exception as e:
         print(f"Error loading JSON from S3: {e}")
         return {}
-    
-def survey_done(success_string, selected_pack, survey, ct_id):
-    st.success(success_string)
 
+def upload_db_to_s3(s3_client, bucket, username, file_name='answers.db'):
+
+    object_name = get_timestamped_db_name()
+    object_name = f'data/replies/{username}/' + object_name
+
+    try:
+        # Upload the file
+        s3_client.upload_file(file_name, bucket, object_name)
+        print(f"File {file_name} uploaded to {bucket}/{object_name}")
+    except Exception as e:
+        print(f"Error uploading file: {e}")
+
+def survey_done(success_string, selected_pack, ct_id):
+    st.success(success_string)
+    username = st.session_state['username']
+
+    select_all_answers()
+    upload_db_to_s3(s3, BUCKET_NAME, 'anotator_0', file_name='answers.db')
+    
     # Define S3 keys for the files
-    finished_key = f"data/replies/{st.session_state['username']}/finished/finished_{selected_pack}"
-    packs_done_key = f"data/replies/{st.session_state['username']}/packs_done.txt"
-    logs_key = f"data/replies/{st.session_state['username']}/logs/general.txt"
+    # finished_key = f"data/replies/{st.session_state['username']}/finished/finished_{selected_pack}"
+    packs_done_key = f"data/replies/{username}/packs_done.txt"
+    logs_key = f"data/replies/{username}/logs/general.txt"
 
     try:
         # Upload finished survey result to S3
-        s3.put_object(Bucket=BUCKET_NAME, Key=finished_key, Body=survey.to_json().encode('utf-8'))
-
+        # s3.put_object(Bucket=BUCKET_NAME, Key=finished_key, Body=survey.to_json().encode('utf-8'))
         # Append to the packs_done.txt file in S3
         # First, download the existing file if it exists
         try:
@@ -109,7 +178,7 @@ def survey_done(success_string, selected_pack, survey, ct_id):
             logs_content = ""  # If the file doesn't exist, start with an empty string
 
         # Append the new log entry
-        log_entry = f"FINISHED Pack\t{selected_pack}\tTimestamp\t{time.time()}\tCtID\t{ct_id}\n"
+        log_entry = f"FINISHED Pack\t{selected_pack}\tTimestamp\t{datetime.now().strftime('%Y%m%d_%H%M%S')}\tCtID\t{ct_id}\n"
         logs_content += log_entry
 
         # Upload the updated logs back to S3
@@ -120,15 +189,6 @@ def survey_done(success_string, selected_pack, survey, ct_id):
 
     except Exception as e:
         print(f"Error writing to S3: {e}")
-
-import boto3
-import time
-
-# Initialize S3 client
-s3 = boto3.client('s3')
-
-# Define your S3 bucket
-bucket_name = 'your-bucket-name'
 
 # Function to log the survey state and activity to S3
 def log_survey_state_and_activity(survey, s_pages, selected_pack, ct_id, username):
@@ -174,8 +234,6 @@ def log_survey_state_and_activity(survey, s_pages, selected_pack, ct_id, usernam
 import re
 import json
 
-import json
-
 def extract_entry_data(entry):
     # Split the entry by '---' to separate the header and the JSON content
     [header, json_part] = entry.split(' ---\n')
@@ -218,7 +276,11 @@ def get_last_state_per_page(survey_log_key):
                                                entry_dict['widgets'])
 
 
-    print("Page states:")
+    for key, val in page_state_dict.items():
+        print(key)
+        print(val)    
     return page_state_dict
 
 # get_last_state_per_page('data/replies/anotator_0/logs/0_last_state.txt')
+# select_all_answers()
+# upload_db_to_s3(s3, BUCKET_NAME, 'anotator_0', file_name='answers.db')
