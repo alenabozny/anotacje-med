@@ -191,95 +191,95 @@ def survey_done(success_string, selected_pack, ct_id):
         print(f"Error writing to S3: {e}")
 
 # Function to log the survey state and activity to S3
-def log_survey_state_and_activity(survey, s_pages, selected_pack, ct_id, username):
-    try:
-        # Define S3 keys for the logs
-        last_state_key = f"data/replies/{username}/logs/{selected_pack}_last_state.txt"
-        general_log_key = f"data/replies/{username}/logs/general.txt"
+# def log_survey_state_and_activity(survey, s_pages, selected_pack, ct_id, username):
+#     try:
+#         # Define S3 keys for the logs
+#         last_state_key = f"data/replies/{username}/logs/{selected_pack}_last_state.txt"
+#         general_log_key = f"data/replies/{username}/logs/general.txt"
 
-        if s_pages.current > 0:
-            # Logging current state of the survey after each question
-            # Fetch the existing last state file if it exists
-            try:
-                last_state_object = s3.get_object(Bucket=BUCKET_NAME, Key=last_state_key)
-                last_state_content = last_state_object['Body'].read().decode('utf-8')
-            except s3.exceptions.NoSuchKey:
-                last_state_content = ""  # If the file doesn't exist, start with an empty string
+#         if s_pages.current > 0:
+#             # Logging current state of the survey after each question
+#             # Fetch the existing last state file if it exists
+#             try:
+#                 last_state_object = s3.get_object(Bucket=BUCKET_NAME, Key=last_state_key)
+#                 last_state_content = last_state_object['Body'].read().decode('utf-8')
+#             except s3.exceptions.NoSuchKey:
+#                 last_state_content = ""  # If the file doesn't exist, start with an empty string
 
-            # Append the new state log entry
-            last_state_content += f"--- time {time.time()} | page {s_pages.current} ---\n"
-            last_state_content += survey.to_json()
+#             # Append the new state log entry
+#             last_state_content += f"--- time {time.time()} | page {s_pages.current} ---\n"
+#             last_state_content += survey.to_json()
 
-            # Upload the updated state log back to S3
-            s3.put_object(Bucket=BUCKET_NAME, Key=last_state_key, Body=last_state_content.encode('utf-8'))
+#             # Upload the updated state log back to S3
+#             s3.put_object(Bucket=BUCKET_NAME, Key=last_state_key, Body=last_state_content.encode('utf-8'))
 
-            # Log activity (page, time, content ID)
-            # Fetch the existing general log file if it exists
-            try:
-                general_log_object = s3.get_object(Bucket=BUCKET_NAME, Key=general_log_key)
-                general_log_content = general_log_object['Body'].read().decode('utf-8')
-            except s3.exceptions.NoSuchKey:
-                general_log_content = ""  # If the file doesn't exist, start with an empty string
+#             # Log activity (page, time, content ID)
+#             # Fetch the existing general log file if it exists
+#             try:
+#                 general_log_object = s3.get_object(Bucket=BUCKET_NAME, Key=general_log_key)
+#                 general_log_content = general_log_object['Body'].read().decode('utf-8')
+#             except s3.exceptions.NoSuchKey:
+#                 general_log_content = ""  # If the file doesn't exist, start with an empty string
 
-            # Append the new activity log entry
-            log_entry = f"Pack\t{selected_pack}\tPage\t{s_pages.current}\tTimestamp\t{time.time()}\tContentID\t{ct_id}\n"
-            general_log_content += log_entry
+#             # Append the new activity log entry
+#             log_entry = f"Pack\t{selected_pack}\tPage\t{s_pages.current}\tTimestamp\t{time.time()}\tContentID\t{ct_id}\n"
+#             general_log_content += log_entry
 
-            # Upload the updated activity log back to S3
-            s3.put_object(Bucket=BUCKET_NAME, Key=general_log_key, Body=general_log_content.encode('utf-8'))
+#             # Upload the updated activity log back to S3
+#             s3.put_object(Bucket=BUCKET_NAME, Key=general_log_key, Body=general_log_content.encode('utf-8'))
 
-    except Exception as e:
-        print(f"Error logging survey state and activity to S3: {e}")
+#     except Exception as e:
+#         print(f"Error logging survey state and activity to S3: {e}")
 
-import re
-import json
+# import re
+# import json
 
-def extract_entry_data(entry):
-    # Split the entry by '---' to separate the header and the JSON content
-    [header, json_part] = entry.split(' ---\n')
+# def extract_entry_data(entry):
+#     # Split the entry by '---' to separate the header and the JSON content
+#     [header, json_part] = entry.split(' ---\n')
     
-    # Extract the timestamp and page from the header
-    timestamp, page_info = header.split(' | ')
-    timestamp = float(timestamp.strip())
+#     # Extract the timestamp and page from the header
+#     timestamp, page_info = header.split(' | ')
+#     timestamp = float(timestamp.strip())
     
-    # Extract the widget key IDs from the JSON
-    data_dict = json.loads(json_part.strip())
+#     # Extract the widget key IDs from the JSON
+#     data_dict = json.loads(json_part.strip())
     
-    # Create a new dictionary to store the result
-    result_dict = {}
-    ct_id = ''
-    for key, value in data_dict.items():
-        # Extract the widget ID from the key (e.g., "5444_wiarygdnosc" -> "5444")
-        widget_id = value['widget_key'].split('_')[1]  # get the part before the underscore
-        result_dict[widget_id] = value['value']  # Store value and timestamp
-        ct_id = value['widget_key'].split('_')[0]
+#     # Create a new dictionary to store the result
+#     result_dict = {}
+#     ct_id = ''
+#     for key, value in data_dict.items():
+#         # Extract the widget ID from the key (e.g., "5444_wiarygdnosc" -> "5444")
+#         widget_id = value['widget_key'].split('_')[1]  # get the part before the underscore
+#         result_dict[widget_id] = value['value']  # Store value and timestamp
+#         ct_id = value['widget_key'].split('_')[0]
     
-    return {
-        "timestamp": timestamp,
-        "ct_id": ct_id,  # Extract the page number
-        "widgets": result_dict
-    }
+#     return {
+#         "timestamp": timestamp,
+#         "ct_id": ct_id,  # Extract the page number
+#         "widgets": result_dict
+#     }
 
-def get_last_state_per_page(survey_log_key):
-    # Split the log into individual states based on "--- time"
-    last_state_object = s3.get_object(Bucket=BUCKET_NAME, Key=survey_log_key)
-    last_state_content = last_state_object['Body'].read().decode('utf-8')
-    survey_states = re.split(r'--- time ', last_state_content)
+# def get_last_state_per_page(survey_log_key):
+#     # Split the log into individual states based on "--- time"
+#     last_state_object = s3.get_object(Bucket=BUCKET_NAME, Key=survey_log_key)
+#     last_state_content = last_state_object['Body'].read().decode('utf-8')
+#     survey_states = re.split(r'--- time ', last_state_content)
     
-    # Dictionary to store the last state per page
-    page_state_dict = {}
+#     # Dictionary to store the last state per page
+#     page_state_dict = {}
     
-    # Iterate through each state entry and extract the page and JSON data
-    for entry in survey_states[1:]:  # Skip the first empty entry
-        entry_dict = extract_entry_data(entry)
-        page_state_dict[entry_dict['ct_id']] = (entry_dict['timestamp'], 
-                                               entry_dict['widgets'])
+#     # Iterate through each state entry and extract the page and JSON data
+#     for entry in survey_states[1:]:  # Skip the first empty entry
+#         entry_dict = extract_entry_data(entry)
+#         page_state_dict[entry_dict['ct_id']] = (entry_dict['timestamp'], 
+#                                                entry_dict['widgets'])
 
 
-    for key, val in page_state_dict.items():
-        print(key)
-        print(val)    
-    return page_state_dict
+#     for key, val in page_state_dict.items():
+#         print(key)
+#         print(val)    
+#     return page_state_dict
 
 # get_last_state_per_page('data/replies/anotator_0/logs/0_last_state.txt')
 # select_all_answers()

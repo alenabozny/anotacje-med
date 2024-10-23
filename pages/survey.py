@@ -10,7 +10,7 @@ from uuid import uuid4
 import os
 from streamlit_extras.switch_page_button import switch_page
 import time
-from utils import list_user_packs, get_user_progress_from_s3, load_json_from_s3, survey_done, log_survey_state_and_activity, update_ans_dict 
+from utils import list_user_packs, get_user_progress_from_s3, load_json_from_s3, survey_done, update_ans_dict 
 
 # Hide the sidebar
 
@@ -27,6 +27,13 @@ st.markdown(
             display: none;
         }
     </style>
+    <script>
+        document.querySelectorAll('button').forEach(function(button) {
+            if (button.textContent.trim() === 'Previous') {
+                button.style.display = 'none';
+            }
+        });
+    </script>
     """,
     unsafe_allow_html=True,
 )
