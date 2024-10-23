@@ -8,6 +8,30 @@ credentials:
       email: 'abc'
       name: 'ANOTATOR #0'
       password: $2b$12$fqkM7dZ5iC17ibAJELs1Jei4lq6gH5AtoNJe0D4MsVEeKNH2gymim
+    anotator_1:
+      email: ''
+      name: 'ANOTATOR #1'
+      password: $2b$12$x/.mW09atZIl.NXtaXz.0Oyp.obN7sUwfXqkJr039lvS4ogyKINKG
+    anotator_2:
+      email: ''
+      name: 'ANOTATOR #2'
+      password: $2b$12$Snx7bLeFerYw5rgcGDWcY.v6sprjZSbFsaVgNZi.acSvKtOctEoba
+    anotator_3:
+      email: ''
+      name: 'ANOTATOR #3'
+      password: $2b$12$xGr.dLlDc3SVPE8OGm3CReKPufxI8utBclaj6acacCLQkJ2pnJ6fG
+    anotator_4:
+      email: ''
+      name: 'ANOTATOR #4'
+      password: $2b$12$y6opXYJaqULHkR9pn0Yb1e9du5Fs69nEKa4bFXGQNNHrgeDaNcgAO
+    anotator_5:
+      email: ''
+      name: 'ANOTATOR #5'
+      password: $2b$12$IDS4ptWWMbAd.xKCnkH1zO8AwapZpKrhgr46R.wQ6cY9XoYtsVN0G
+    anotator_6:
+      email: ''
+      name: 'ANOTATOR #6'
+      password: $2b$12$SwbcK9D8wC8Dj7c5lI5bOeQ/UFP7s7qth23UUjfozVRJVEPWg2OMm
 
 
 cookie:
