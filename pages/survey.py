@@ -83,8 +83,9 @@ try:
                     # print(cred_val)
                     ans_tpl = ans_tpl + (cred_val,)
                 except Exception as e:
-                    print(e)
-                    print("Pusty dict")
+                    # print(e)
+                    # print("Pusty dict")
+                    pass
 
                 try:
                     unable_val = survey_dict['Dane we fragmencie są niemozliwe do weryfikacji.']["value"]
@@ -92,7 +93,8 @@ try:
                     ans_tpl = ans_tpl + (unable_val,)
                 except Exception as e:
                     # print(e)
-                    print("Brak info o mozliwosci oceny")
+                    # print("Brak info o mozliwosci oceny")
+                    pass
 
                 try:
                     tags_val = survey_dict["Dlaczego tekst jest według Ciebie niewiarygodny:"]["value"]
@@ -100,7 +102,8 @@ try:
                     ans_tpl = ans_tpl + (tags_val,)
                 except Exception as e:
                     # print(e)
-                    print("Brak pozycji 'dlaczego niewiarygodny'")
+                    # print("Brak pozycji 'dlaczego niewiarygodny'")
+                    pass
 
                 # log_survey_state_and_activity(survey, s_pages, selected_pack, ct_id, username)
 
@@ -140,5 +143,5 @@ try:
     else:
         switch_page("main")
 except Exception as e:
-    print(e)
+    # print(e)
     switch_page("main")

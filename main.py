@@ -44,7 +44,7 @@ name, authentication_status, username = authenticator.login('Zaloguj się', 'mai
 
 if st.session_state["authentication_status"]:
     authenticator.logout(':no_entry_sign: Wyloguj się', 'main', key='unique_key')
-    st.write(f"Jesteś zalogowany jako *{st.session_state['name']}*")
+    st.write(f"Jesteś zalogowany jako *{st.session_state['username']}*")
 
     # Serve the list of available surveys
 
