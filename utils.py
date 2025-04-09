@@ -130,7 +130,7 @@ def load_json_from_s3(file_key):
 
 def upload_db_to_s3(s3_client, bucket, username, file_name='answers.db'):
     object_name = get_timestamped_db_name()
-    object_name = f'data/replies/' + object_name + f"_{username}"
+    object_name = f'data/replies/{username}/' + object_name
 
     try:
         # Upload the file
@@ -139,12 +139,10 @@ def upload_db_to_s3(s3_client, bucket, username, file_name='answers.db'):
     except Exception as e:
         print(f"Error uploading file: {e}")
 
-def survey_done(success_string, selected_pack, ct_id):
+def survey_done(success_string, selected_pack, ct_id, username):
     st.success(success_string)
-    username = st.session_state['username']
-
     select_all_answers()
-    upload_db_to_s3(s3, BUCKET_NAME, 'anotator_0', file_name='answers.db')
+    upload_db_to_s3(s3, BUCKET_NAME, username, file_name='answers.db')
     
     # Define S3 keys for the files
     # finished_key = f"data/replies/{st.session_state['username']}/finished/finished_{selected_pack}"
