@@ -69,12 +69,14 @@ try:
             if s_pages.current == 0:
                 st.markdown('''
                             Zaraz zaczniesz rundę anotacji fragmentów treści pochodzących z popularnonaukowych portali medycznych 
-                            (medonet, hellozdrowie, itp.). Oceń ich wiarygodność na podstawie EMB, własnej intuicji oraz doświadczenia klinicznego.
+                            (medonet, hellozdrowie, itp.). Mogą być napisane językiem kolokwialnym. Oceń ich wiarygodność na podstawie EMB, własnej intuicji oraz doświadczenia klinicznego.
 
-- Oceniane będą „treści medyczne” z dziedziny medycyny, które są merytoryczne, obiektywnie weryfikowalne i zawierają odniesienia do EBM.
-- „Treść medyczna” składa się z kilku zdań. Jeśli zdania są ze sobą logicznie powiązane, cały fragment jest oceniany łącznie. Jeśli zdania nie są logicznie powiązane, są oceniane osobno. Następnie, jeśli przynajmniej jedno z nich jest niewiarygodne, należy ocenić treść jako niewiarygodną.
+- Fragment tejstu składa się z kilku zdań. Jeśli zdania są ze sobą logicznie powiązane, cały fragment jest oceniany łącznie. Jeśli zdania nie są logicznie powiązane, są oceniane osobno. Następnie, jeśli przynajmniej jedno z nich jest niewiarygodne, należy ocenić treść jako niewiarygodną.
 - Zaleca się sprawdzenie informacji w wiarygodnych, aktualnych źródłach, jeśli treść pochodzi z dziedziny, która nie jest obszarem specjalizacji danego eksperta.
-
+- Część fragmentów pochodzi z publikacji z czasów pandemii COVID-19, które mogą być nieaktualne. W takim przypadku należy ocenić ich wiarygodność w odniesieniu do aktualnych wytycznych z czasu publikacji.
+- Cudza opinia nie jest faktem medycznym. Jeśli fragment zawiera cudzą opinię, należy zaznaczyć 'niemożliwy do weryfikacji'.
+- Niska jakość raportowania (np. drobne nieścisłości w raportowaniu danych statystycznych) w treściach skierowanych do laików nie powinny dyskredytować ich wiarygodności.
+- Fragmenty, które zawierają nieweryfikowalne dane powinny być oceniane jako niewiarygodne (np. podawane są jakieś liczby, ale nie ma publikacji naukowych potwierdzających danych wyliczeń).
                             ''')
             else:
                 current_content = contents[s_pages.current-1]
@@ -118,24 +120,25 @@ try:
                         options=["Wiarygodny", "Neutralny", "Niewiarygodny"],
                         captions=[
                             "Wszystko się zgadza",
-                            "Fragment nie dotyczy medycyny",
-                            "Fałszywe informacje, wyolbrzymienie, zła interpretacja prawdziwych danych, etc.",
+                            "Fragment nie dotyczy medycyny lub ma charakter satyryczny",
+                            "Informacje (częściowo lub w całości) niezgodne z EBM; 'halucynacje', czyli dane niemożliwe do weryfikacji",
                         ],
                         key=f"{ct_id}_wiarygdnosc",
                         index=None
                     )
-                    if cred == "Niewiarygodny":
-                        survey.multiselect("Dlaczego tekst jest według Ciebie niewiarygodny:", 
-                                        options=['Zawiera fałszywe informacje',
-                                                    'Zawiera przedawnione/nieaktualne informacje',
-                                                    'Zawiera częściowo fałszywe informacje',
-                                                    'Zawiera fałszywe informacje, które są rozmyte poprzez złagodzony ton wypowiedzi',
-                                                    'Zawiera informacje niemozliwe do zweryfikowania',
-                                                    'Zawiera prawdziwe informacje, jednak nieproporcjonalnie wyolbrzymione',
-                                                    'Zawiera prawdziwe informacje, ale sens zdania jest wypaczony przez jedno słowo'], 
-                                        key=f"{ct_id}_czemu_niewiarygodne",
-                                        default=None)
-                    elif cred is None: # Check if the user has made a selection
+                    # if cred == "Niewiarygodny":
+                    #     survey.multiselect("Dlaczego tekst jest według Ciebie niewiarygodny:", 
+                    #                     options=['Zawiera fałszywe informacje',
+                    #                                 'Zawiera przedawnione/nieaktualne informacje',
+                    #                                 'Zawiera częściowo fałszywe informacje',
+                    #                                 'Zawiera fałszywe informacje, które są rozmyte poprzez złagodzony ton wypowiedzi',
+                    #                                 'Zawiera informacje niemozliwe do zweryfikowania',
+                    #                                 'Zawiera prawdziwe informacje, jednak nieproporcjonalnie wyolbrzymione',
+                    #                                 'Zawiera prawdziwe informacje, ale sens zdania jest wypaczony przez jedno słowo'], 
+                    #                     key=f"{ct_id}_czemu_niewiarygodne",
+                    #                     default=None)
+                    # elif cred is None: # Check if the user has made a selection
+                    if cred is None: # Check if the user has made a selection
                         st.error("Proszę dokonać wyboru przed kontynuacją.")
                 
                 update_ans_dict(ct_id_to_save, ans_tpl)
