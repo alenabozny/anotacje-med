@@ -165,3 +165,5 @@ users_yaml_*
 */.DS_Store
 
 data/*
+
+data/sourcepacks_med/*
