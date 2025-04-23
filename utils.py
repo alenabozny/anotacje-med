@@ -141,7 +141,7 @@ def upload_db_to_s3(s3_client, bucket, username, file_name='answers.db'):
 
 def survey_done(success_string, selected_pack, ct_id, username):
     st.success(success_string)
-    select_all_answers()
+    # select_all_answers()
     upload_db_to_s3(s3, BUCKET_NAME, username, file_name='answers.db')
     
     # Define S3 keys for the files

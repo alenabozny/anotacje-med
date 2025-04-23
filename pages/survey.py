@@ -69,14 +69,14 @@ try:
             if s_pages.current == 0:
                 st.markdown('''
                             Zaraz zaczniesz rundę anotacji fragmentów treści pochodzących z popularnonaukowych portali medycznych 
-                            (medonet, hellozdrowie, itp.). Mogą być napisane językiem kolokwialnym. Oceń ich wiarygodność na podstawie EMB, własnej intuicji oraz doświadczenia klinicznego.
+                            (medonet, hellozdrowie, itp.). Mogą być napisane językiem kolokwialnym. Oceń ich wiarygodność na podstawie EBM, własnej intuicji oraz doświadczenia klinicznego.
 
-- Fragment tejstu składa się z kilku zdań. Jeśli zdania są ze sobą logicznie powiązane, cały fragment jest oceniany łącznie. Jeśli zdania nie są logicznie powiązane, są oceniane osobno. Następnie, jeśli przynajmniej jedno z nich jest niewiarygodne, należy ocenić treść jako niewiarygodną.
+- Fragment tekstu składa się z kilku zdań. Jeśli zdania są ze sobą logicznie powiązane, cały fragment jest oceniany łącznie. Jeśli zdania nie są logicznie powiązane, są oceniane osobno. Następnie, jeśli przynajmniej jedno z nich jest niewiarygodne, należy ocenić treść jako niewiarygodną.
 - Zaleca się sprawdzenie informacji w wiarygodnych, aktualnych źródłach, jeśli treść pochodzi z dziedziny, która nie jest obszarem specjalizacji danego eksperta.
 - Część fragmentów pochodzi z publikacji z czasów pandemii COVID-19, które mogą być nieaktualne. W takim przypadku należy ocenić ich wiarygodność w odniesieniu do aktualnych wytycznych z czasu publikacji.
 - Cudza opinia nie jest faktem medycznym. Jeśli fragment zawiera cudzą opinię, należy zaznaczyć 'niemożliwy do weryfikacji'.
 - Niska jakość raportowania (np. drobne nieścisłości w raportowaniu danych statystycznych) w treściach skierowanych do laików nie powinny dyskredytować ich wiarygodności.
-- Fragmenty, które zawierają nieweryfikowalne dane powinny być oceniane jako niewiarygodne (np. podawane są jakieś liczby, ale nie ma publikacji naukowych potwierdzających danych wyliczeń).
+- Fragmenty, które zawierają nieweryfikowalne dane powinny być oceniane jako niewiarygodne (np. podawane są jakieś liczby, ale nie ma publikacji naukowych potwierdzających dane wyliczenie).
                             ''')
             else:
                 current_content = contents[s_pages.current-1]
